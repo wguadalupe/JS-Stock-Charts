@@ -1,10 +1,13 @@
 async function main() {
     const timeChartCanvas = document.querySelector('#time-chart');
-    const highestPriceChartCanvas = document.querySelector('#highest-price-chart');
-    const averagePriceChartCanvas = document.querySelector('#average-price-chart');
-  
+   const highestPriceChartCanvas = document.querySelector('#highest-price-chart');
+
+   if (highestPriceChartCanvas.chart) {
+       highestPriceChartCanvas.chart.destroy();
+   }
+
     const stockData = await getStockData();
-  
+
     let GME = stockData.GME;
     let MSFT = stockData.MSFT;
     let DIS = stockData.DIS;
@@ -31,11 +34,29 @@ async function main() {
   }
   
   stocks.forEach (stock => stock.values.reverse())
+
+  function highestStockValue(stocks) {
+    //return null for an empty array
+    if (stocks.length === 0) {
+        return null;
+    }
+    //initialize with the 1st stock value
+    let highestStock = stocks[0];
+
+    for (let i = 1; i <stocks.length; i++) {
+        if (stocks[i] > highestStock)  {
+            highestStock = stocks[i];
+        }
+    }
+
+    return highestStock;
+
+  }
   
-    new Chart(timeChartCanvas.getContext('2d'), {
-      type: 'line',
+    new Chart(highestPriceChartCanvas.getContext('2d'), {
+      type: 'bar',
       data: {
-          labels: stocks[0].values.map(value => value.datetime),
+          labels: stocks[0].values.map(value => value.high),
           datasets: stocks.map( stock => ({
               label: stock.meta.symbol,
               data: stock.values.map(value => parseFloat(value.high)),
@@ -62,4 +83,4 @@ async function main() {
   }
   
   main();
-  
+
